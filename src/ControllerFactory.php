@@ -1,13 +1,14 @@
 <?php
 namespace Leap;
 
+use Psr\Container\ContainerInterface;
 
 class ControllerFactory
 {
 
     private $di;
 
-    function __construct(Container $di)
+    function __construct(ContainerInterface $di)
     {
         /* Normally it is bad design to inject DI Container into a class,
          * because it can be misused as a service locator. However, for this

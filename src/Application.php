@@ -3,6 +3,7 @@
 namespace Leap;
 
 use Leap\Interfaces\ConfigInterface;
+use Leap\Container\Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Container\ContainerInterface;
 

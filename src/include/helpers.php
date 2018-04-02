@@ -1,6 +1,10 @@
 <?php
 /* Where am I? */
 define('ROOT', call_user_func(function () {
+    return str_replace("\\", "/",dirname(debug_backtrace()[2]['file'])) . "/";
+}));
+
+define('CORE_ROOT',call_user_func(function(){
     $root = str_replace("\\", "/", dirname(dirname(dirname(__FILE__))));
     $root .= (substr($root, -1) === '/' ? '' : '/');
     return $root;
