@@ -194,7 +194,67 @@ class Kernel
         $response   = $dispatcher->dispatch($request);
 
         /* Output the PSR-7 Response object */
-        (new SapiStreamEmitter())->emit($response);
+        $this->respond($response);
+    }
+
+    /**
+     * Send the response the client
+     *
+     * Source: Slim 3 Framework
+     *
+     * @param ResponseInterface $response
+     */
+    public function respond(ResponseInterface $response)
+    {
+        // Send response
+        if (!headers_sent()) {
+            // Headers
+            foreach ($response->getHeaders() as $name => $values) {
+                foreach ($values as $value) {
+                    header(sprintf('%s: %s', $name, $value), false);
+                }
+            }
+            // Set the status _after_ the headers, because of PHP's "helpful" behavior with location headers.
+            // See https://github.com/slimphp/Slim/issues/1730
+            // Status
+            header(sprintf(
+                       'HTTP/%s %s %s',
+                       $response->getProtocolVersion(),
+                       $response->getStatusCode(),
+                       $response->getReasonPhrase()
+                   ));
+        }
+        // Body
+        if (!in_array($response->getStatusCode(), [204, 205, 304])) {
+            $body = $response->getBody();
+            if ($body->isSeekable()) {
+                $body->rewind();
+            }
+            $chunkSize = 4096;
+            $contentLength  = $response->getHeaderLine('Content-Length');
+            if (!$contentLength) {
+                $contentLength = $body->getSize();
+            }
+            if (isset($contentLength)) {
+                $amountToRead = $contentLength;
+                while ($amountToRead > 0 && !$body->eof()) {
+                    $data = $body->read(min($chunkSize, $amountToRead));
+                    echo $data;
+                    $amountToRead -= strlen($data);
+                    if (connection_status() != CONNECTION_NORMAL) {
+                        break;
+                    }
+                }
+            } else {
+                while (!$body->eof()) {
+                    echo $body->read($chunkSize);
+                    if (connection_status() != CONNECTION_NORMAL) {
+                        break;
+                    }
+                }
+            }
+        }
+        return $response;
     }
 
 

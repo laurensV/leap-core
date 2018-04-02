@@ -40,7 +40,7 @@ class Application
      *
      * @param string $configuration
      */
-    function __construct($configuration = [], $custom_container = null)
+    function __construct($configuration = [], ContainerInterface $custom_container = null)
     {
         /*
         |--------------------------------------------------------------------------
